@@ -1,0 +1,2 @@
+# TrueORFalse
+ChatGPTが嘘をつくアプリです
