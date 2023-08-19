@@ -6,7 +6,8 @@
         <title>難易度選択画面</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-        <link href="{% static 'css/Loading.css' %}" rel="stylesheet">
+        <link href="{% static 'css/loading.css' %}" rel="stylesheet">
+        <link href="{% static 'css/main.css' %}" rel="stylesheet">
     </head>
     <body class="main">
         {% block content %}
@@ -62,19 +63,7 @@
                 <p>きゅうりは熟すと黄色になるぞ！</p>
             </div>
         </div>
-        <!-- フォームが送信されたときにローディングスピナーを表示するためのJavaScript -->
-        <script>
-            document.getElementById("loading-form").addEventListener("submit", function () {
-                // フォームが送信されたときにローディングスピナーを表示
-                document.getElementById("loading-container").style.display = "block";
-                document.getElementById("difficulty-select").style.display = "none";
-            });
-        </script>
+        <script src="{% static 'js/loading.js' %}"></script>
         {% endblock %}
-        <style>
-            .main {
-                text-align: center;
-            }
-        </style>
     </body>
 </html>
