@@ -60,7 +60,11 @@ $ git clone https://github.com/Code1964/TrueORFalse.git
 
 ## Setting up a Docker environment
 
+更新したい場合
 ```
 $ docker build -t trueorfalse .
+```
+起動したい場合
+```
 $ docker-compose up -d
 ```

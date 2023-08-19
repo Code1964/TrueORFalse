@@ -7,11 +7,11 @@ RUN mkdir /TrueFalseGPT
 
 WORKDIR /mysite
 
-RUN pip install --upgrade pip
+RUN pip3 install --upgrade pip
 
 ADD requirements.txt /mysite/
 
-RUN pip3 install -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 ADD . /mysite/
 

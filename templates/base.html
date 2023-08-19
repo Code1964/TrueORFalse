@@ -53,11 +53,11 @@
             <button class="btn btn-primary m-4" onclick="next()">次へ</button>
         </div>
         <script>
-            var index = 0;
-            var points = 0;
-            var button_value;
+            let index = 0;
+            let points = 0;
+            let button_value;
             // hintボタンを押さなくても発生してしまう無駄な処理を防ぐため
-            var hint_click = false;
+            let hint_click = false;
             const data = JSON.parse("{{ data|escapejs }}");
 
             window.onload = function setup() {
