@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>難易度選択画面</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+        <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    </head>
+    <body class="main">
+        {% block content %}
+        <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+            <div id="difficulty-select">
+                <h1 class="m-3">難易度を選択してください</h1>
+                <form method="POST" id="loading-form">
+                    {% csrf_token %}
+                    <div class="form-check">
+                        <label class="mr-3">
+                            <input type="radio" name="selected_difficulty" value="elementary_school"> 小学生
+                        </label>
+                        <label class="mr-3">
+                            <input type="radio" name="selected_difficulty" value="high_school"> 高校生
+                        </label>
+                        <label class="mr-3">
+                            <input type="radio" name="selected_difficulty" value="society"> 社会人
+                        </label>
+                    </div>
+                    <h3 class="m-3">ジャンルを選択してください</h3>
+                    <div class="form-check">
+                        <label class="mr-3">
+                            <input type="radio" name="selected_genre" value="miscellaneous"> 雑学
+                        </label>
+                        <label class="mr-3">
+                            <input type="radio" name="selected_genre" value="history"> 歴史
+                        </label>
+                        <label class="mr-3">
+                            <input type="radio" name="selected_genre" value="it"> IT
+                        </label>
+                    </div>
+                    <br>
+                    {% if error_text %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error_text }}
+                    </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary">Start!</button>
+                </form>
+            </div>
+            <!-- ローディングのアニメーション -->
+            <div class="wrapper" id="loading-container">
+                <h1>Loading...</h1>
+                <div class="box-wrap">
+                    <div class="box one"></div>
+                    <div class="box two"></div>
+                    <div class="box three"></div>
+                    <div class="box four"></div>
+                    <div class="box five"></div>
+                    <div class="box six"></div>
+                </div>
+                <h4>豆知識</h4>
+                <p>きゅうりは熟すと黄色になるぞ！</p>
+            </div>
+        </div>
+        <!-- フォームが送信されたときにローディングスピナーを表示するためのJavaScript -->
+        <script>
+            document.getElementById("loading-form").addEventListener("submit", function () {
+                // フォームが送信されたときにローディングスピナーを表示
+                document.getElementById("loading-container").style.display = "block";
+                document.getElementById("difficulty-select").style.display = "none";
+            });
+        </script>
+        {% endblock %}
+        <style>
+            .main {
+                text-align: center;
+            }
+        </style>
+    </body>
+</html>
