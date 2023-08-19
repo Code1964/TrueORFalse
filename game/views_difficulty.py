@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import Data
-import json
+import json, random
 # 何故か読み込めないため非表示
 # import openai
 from dotenv import load_dotenv
@@ -125,4 +125,8 @@ def difficulty(request):
         Data.objects.create(questions=text)
         return render(request, "base.html", context={"data": text, "API": API})
 
-    return render(request, "difficulty.html")
+    # 豆知識JSONファイル読み込み
+    with open('./trivia.json') as f:
+        trivia = json.load(f)
+        trivia_text = random.choice(trivia)
+        return render(request, "difficulty.html", context={"trivia_text": trivia_text})
