@@ -4,7 +4,8 @@ services:
   web:
     build: .
     container_name: TrueORFalseGPT
-    command: python3 manage.py runserver 0.0.0.0:8000
+    # requirements.txtではopenaiが読み込めないため
+    command: bash -c "pip3 install openai && python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
     working_dir: /mysite
     ports:
       - 8000:8000

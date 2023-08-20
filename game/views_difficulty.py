@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from .models import Data
 import json, random
-# 何故か読み込めないため非表示
-# import openai
+import openai
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -108,6 +107,7 @@ def difficulty(request):
             )
             text = response.choices[0]["message"]["content"].strip()
             text = text.replace("'", '"')
+            print(text)
             # JSON形式で出力されない場合処理をやり直す
             try:
                 # JSON形式の文字列をPythonのデータ構造に変更
@@ -115,21 +115,29 @@ def difficulty(request):
             except:
                 pass
             else:
-                # "commentary"と"true_commentary"を同じ文章にする
-                for i, item in enumerate(d):
-                    d[i]["true_commentary"] = item["commentary"]
                 # ここでJSONの一つを抽出し、反対のことを記載する
                 selected_data = random.choice(d)
-                # "answer"と"falsification_answer"をFをTに、TをFにする
-                if selected_data["answer"] == "T":
-                    selected_data["answer"] = "F"
-                elif selected_data["answer"] == "F":
-                    selected_data["answer"] = "T"
-                else:
-                    # どちらでもない場合はバグなので再度生成処理を始める
-                    pass
-                # falsification_answerをFからTに変更
-                selected_data["falsification_answer"] = "T"
+                for i, item in enumerate(d):
+                    # "commentary"と"true_commentary"を同じ文章にする
+                    d[i]["true_commentary"] = item["commentary"]
+                    # "answer"と"falsification_answer"をFをTに、TをFにする
+                    if d[i]["question"] == selected_data["question"]:
+                        # falsification_answerをFからTに変更
+                        d[i]["falsification_answer"] = "T"
+                        if d[i]["answer"] == "T":
+                            d[i]["answer"] = "F"
+                        elif d[i]["answer"] == "F":
+                            d[i]["answer"] = "T"
+                        else:
+                            # どちらでもない場合はバグなので再度生成処理を始める
+                            pass
+                # ensure_ascii=Falseがないと日本語が文字化けする
+                text = json.dumps(d, ensure_ascii=False)
+                print(text)
+                # データベースに登録
+                Data.objects.create(questions=text)
+                return render(request, "base.html", context={"data": text})
+
                 # 改ざんするGPTのプロンプト
                 falsification_prompt = """
                 あなたは元々存在するものとは異なる解説文を生成するbotです。
@@ -153,14 +161,14 @@ def difficulty(request):
                 # selected_dataの"commentary"を更新
                 selected_data["commentary"] = falsification_commentary
                 # text内の該当する部分をselected_dataで置き換える
-                for i, item in enumerate(d):
+                for i, item in enumerate(text):
                     if item["question"] == selected_data["question"]:
-                        d[i] = selected_data
+                        text[i] = selected_data
                 # Pythonのデータ構造をJSON形式の文字列に変更
-                updated_text = json.dumps(d)
+                updated_text = json.dumps(text)
                 print(updated_text)
                 # データベースに登録
-                Data.objects.create(questions=updated_text)
+                # Data.objects.create(questions=updated_text)
                 return render(request, "base.html", context={"data": updated_text})
 
     # 豆知識JSONファイル読み込み

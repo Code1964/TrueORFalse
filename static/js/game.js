@@ -10,6 +10,8 @@ let wrong_answer = false;
 let hint_click = false;
 const data = JSON.parse("{{ data|escapejs }}");
 
+// ページが開いた時点でjsが動く処理を書く
+
 window.onload = function setup() {
   document.getElementById("question").textContent = data[index]["question"];
 };
@@ -135,15 +137,17 @@ function objection() {
     document.getElementById("judge").textContent = "異議承認";
     // 指摘成功判定
     falsification_result = "correct";
+    // わざと間違えたanswerを逆に表示させる
+    document.getElementById("actual_answer").textContent =
+      data[index]["answer"] == "T" ? "本当の正解:False" : "本当の正解:True";
   } else {
     points -= 10;
     document.getElementById("judge").textContent = "異議却下";
     // 指摘失敗判定
     falsification_result = "incorrect";
+    document.getElementById("actual_answer").textContent =
+      data[index]["answer"] == "T" ? "本当の正解:True" : "本当の正解:False";
   }
-  // わざと間違えたanswerを逆に表示させる
-  document.getElementById("actual_answer").textContent =
-    data[index]["answer"] == "T" ? "本当の正解:False" : "本当の正解:True";
   document.getElementById("actual_commentary").textContent =
     data[index]["true_commentary"];
   document.getElementById("points").textContent = "現在のポイント: " + points;
