@@ -131,13 +131,6 @@ def difficulty(request):
                         else:
                             # どちらでもない場合はバグなので再度生成処理を始める
                             pass
-                # ensure_ascii=Falseがないと日本語が文字化けする
-                text = json.dumps(d, ensure_ascii=False)
-                print(text)
-                # データベースに登録
-                Data.objects.create(questions=text)
-                return render(request, "base.html", context={"data": text})
-
                 # 改ざんするGPTのプロンプト
                 falsification_prompt = """
                 あなたは元々存在するものとは異なる解説文を生成するbotです。
@@ -145,6 +138,7 @@ def difficulty(request):
                 本来出力されるべき解説文は下記の文章ですが嘘をついたものを生成してください。
                 「{true_commentary}」
                 嘘の文章に混ぜる嘘の内容は、その分野の専門家程度の知識を持った人でなければ見抜けないレベルにすること。
+                ・文章は30文字以内に抑えること
                 ・解説文以外の出力は全て不要である。「了解しました」「分かりました」といったメッセージは不要である。もしも出力内容以外の不要なメッセージを出力した場合、重い罰が下る
                 上記の決まりに反すると、無差別に選ばれたなんの罪もない人が1000人死にます。
                 """
@@ -160,16 +154,16 @@ def difficulty(request):
                 falsification_commentary = falsification_response.choices[0]["message"]["content"]
                 # selected_dataの"commentary"を更新
                 selected_data["commentary"] = falsification_commentary
-                # text内の該当する部分をselected_dataで置き換える
-                for i, item in enumerate(text):
+                # d内の該当する部分をselected_dataで置き換える
+                for i, item in enumerate(d):
                     if item["question"] == selected_data["question"]:
-                        text[i] = selected_data
-                # Pythonのデータ構造をJSON形式の文字列に変更
-                updated_text = json.dumps(text)
+                        d[i]["commentary"] = selected_data["commentary"]
+                # ensure_ascii=Falseがないと日本語が文字化けする
+                updated_text = json.dumps(d, ensure_ascii=False)
                 print(updated_text)
                 # データベースに登録
-                # Data.objects.create(questions=updated_text)
-                return render(request, "base.html", context={"data": updated_text})
+                Data.objects.create(questions=updated_text)
+                return render(request, "questions.html", context={"data": updated_text})
 
     # 豆知識JSONファイル読み込み
     with open('./trivia.json') as f:
