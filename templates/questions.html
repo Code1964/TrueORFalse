@@ -1,6 +1,12 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}ゲーム画面{% endblock %}
+
+{% block css %}
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+{% endblock %}
+
 
 {% block content %}
 {% csrf_token %}
