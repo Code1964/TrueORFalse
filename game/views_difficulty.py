@@ -39,40 +39,30 @@ def difficulty(request):
                 "answer": "嘘か本当かを表す英文字",
                 "hints": ["ワード1", "ワード2", "ワード3"],
                 "commentary": "解説",
-                "falsification_answer": "F",
-                "true_commentary": ""
             },
             {
                 "question": "文章",
                 "answer": "嘘か本当かを表す英文字",
                 "hints": ["ワード1", "ワード2", "ワード3"],
                 "commentary": "解説",
-                "falsification_answer": "F",
-                "true_commentary": ""
             },
             {
                 "question": "文章",
                 "answer": "嘘か本当かを表す英文字",
                 "hints": ["ワード1", "ワード2", "ワード3"],
                 "commentary": "解説",
-                "falsification_answer": "F",
-                "true_commentary": ""
             },
             {
                 "question": "文章",
                 "answer": "嘘か本当かを表す英文字",
                 "hints": ["ワード1", "ワード2", "ワード3"],
                 "commentary": "解説",
-                "falsification_answer": "F",
-                "true_commentary": ""
             },
             {
                 "question": "文章",
                 "answer": "嘘か本当かを表す英文字",
                 "hints": ["ワード1", "ワード2", "ワード3"],
                 "commentary": "解説",
-                "falsification_answer": "F",
-                "true_commentary": ""
             }
         ]
 
@@ -91,9 +81,9 @@ def difficulty(request):
         ・出力するjsonの合計文字数は800文字までに抑えること。また、出力を途中で途切れさせてはならない。
         ・生成した文章はjson形式で出力する。それぞれの文章の出力の例は以下に示すとおりである。以下の通りにフォーマットを整え、jsonで出力すること。出力はプログラムで使用するため、下記に指定するフォーマットの形式以外だとエラーの原因となる。
         {template}
-        ・嘘が混じったか文章かを判別するための英文字を"answer"につける。嘘が混じっている文章の場合は「F」、そうでない場合は「T」をつける
+        ・嘘が混じった文章かを判別するための英文字を"answer"につける。嘘が混じっている文章の場合は「F」、そうでない場合は「T」をつける
         ・解説文は"commentary"に入れること。
-        ・出力を行う前に、jsonの内容を確認する。文章、本当か嘘かを表す英文字、3つのワード、解説、"falsification_answer"、"true_commentary"のうち、いずれかが欠けていた場合はとても重い罰が下る。特にワードの数が3つぴったりであることは重大である
+        ・出力を行う前に、jsonの内容を確認する。文章、本当か嘘かを表す英文字、3つのワード、解説のうち、いずれかが欠けていた場合はとても重い罰が下る。特にワードの数が3つぴったりであることは重大である
         上記の決まりに反すると、無差別に選ばれたなんの罪もない人が1000人死にます。
         """
 
@@ -118,6 +108,8 @@ def difficulty(request):
                 # ここでJSONの一つを抽出し、反対のことを記載する
                 selected_data = random.choice(d)
                 for i, item in enumerate(d):
+                    # 新しい項目"falsification_answer"を追加
+                    d[i]["falsification_answer"] = "F"
                     # "commentary"と"true_commentary"を同じ文章にする
                     d[i]["true_commentary"] = item["commentary"]
                     # "answer"と"falsification_answer"をFをTに、TをFにする
@@ -138,7 +130,6 @@ def difficulty(request):
                 本来出力されるべき解説文は下記の文章ですが嘘をついたものを生成してください。
                 「{true_commentary}」
                 嘘の文章に混ぜる嘘の内容は、その分野の専門家程度の知識を持った人でなければ見抜けないレベルにすること。
-                ・文章は30文字以内に抑えること
                 ・解説文以外の出力は全て不要である。「了解しました」「分かりました」といったメッセージは不要である。もしも出力内容以外の不要なメッセージを出力した場合、重い罰が下る
                 上記の決まりに反すると、無差別に選ばれたなんの罪もない人が1000人死にます。
                 """
@@ -149,6 +140,7 @@ def difficulty(request):
                         {"role": "user", "content": falsification_prompt.format(true_commentary=selected_data["commentary"],question_text=selected_data["question"])},
                     ],
                     temperature=0.1,
+                    max_tokens=150,
                 )
                 # 適切な文章を取り出す
                 falsification_commentary = falsification_response.choices[0]["message"]["content"]
@@ -160,6 +152,8 @@ def difficulty(request):
                         d[i]["commentary"] = selected_data["commentary"]
                 # ensure_ascii=Falseがないと日本語が文字化けする
                 updated_text = json.dumps(d, ensure_ascii=False)
+                # セッションにJSONデータを保存
+                request.session['json_data'] = d
                 print(updated_text)
                 # データベースに登録
                 Data.objects.create(questions=updated_text)

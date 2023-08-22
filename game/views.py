@@ -2,6 +2,8 @@ from django.shortcuts import render
 
 # Create your views here.
 def result(request):
+    # セッションからJSONデータを取得
+    json_data = request.session.get('json_data', {})
     point = request.GET.get("point", "")
     int_point = int(point)
     falsification = request.GET.get("falsification", "")
@@ -35,4 +37,4 @@ def result(request):
         image_url = "img/stamp_english1.png"
         result_text = f"嘘を見抜くことはコミュニケーションスキルの一環であり、相手の表情や言動、状況などから様々な情報を組み合わせて判断する能力が必要です。養っていけるよう頑張っていきましょう。"
 
-    return render(request, "result.html", context={"point": point, "image_url": image_url, "result_text": result_text})
+    return render(request, "result.html", context={"point": point, "image_url": image_url, "result_text": result_text, "json_data": json_data})
