@@ -7,6 +7,10 @@
     <meta property="og:title" content="うそGPT" />
     <meta property="og:description" content="ChatGPTの嘘を見抜くためのサイトです" />
     <meta property="og:image" content="{% static image_url %}" />
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script>
+        let json = "{{ data|safe }}";
+    </script>
 {% endblock %}
 
 {% block title %}結果発表{% endblock %}
@@ -47,6 +51,12 @@
                                 <p>嘘か本当かを表す英文字: {{ data.falsification_answer }}</p>
                                 <p>真実の解説: {{ data.true_commentary }}</p>
                             {% endif %}
+                            <form id="ajax-file-send" action="{% url 'game:saveDB' %}" method="post">
+                                {% csrf_token %}
+                                <!-- この書き方絶対に良くない(バグの温床) -->
+                                <input type="hidden" id="jsonData" value="{{ data|safe }}">
+                                <button type="button" id="saveButton" class="btn btn-primary">データを保存</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -57,4 +67,42 @@
         {% endif %}
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const saveButton = document.getElementById("saveButton");
+        saveButton.addEventListener("click", function() {
+            const jsonData = document.getElementById("jsonData").value;
+            saveDB(jsonData);
+        });
+    });
+    function saveDB(data) {
+        const saveUrl = "{% url 'game:saveDB' %}";
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        // JSONデータ化
+        const jsonDataStr = JSON.stringify(data);
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/result/saveDB" , true);
+        // これしても文字化けする
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("X-CSRFToken", csrfToken);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    alert("データが保存されました");
+                    // ボタンを無効化
+                    document.getElementById("saveButton").disabled = true;
+                    document.getElementById("saveButton").style.display = "none";
+                } else {
+                    alert("データの保存に失敗しました");
+                }
+            }
+        };
+        // これをしても文字化けする
+        // // JSON文字列をパースしてオブジェクトに変換
+        // const jsonDataObj = JSON.parse(jsonDataStr);
+        // // オブジェクトを文字列化して送信
+        // xhr.send(JSON.stringify(jsonDataObj));
+        xhr.send(jsonDataStr);
+    }
+</script>
 {% endblock %}

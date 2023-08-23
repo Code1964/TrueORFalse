@@ -148,18 +148,6 @@
         }
         falsification = false;
         index++;
-        document.getElementById("question_number").textContent = index + 1;
-        document.getElementById("judge_button").style.display = "block";
-        document.getElementById("objection_action").style.display = "none";
-        document.getElementById("next_button").style.display = "none";
-        document
-            .getElementById("google_hints")
-            .setAttribute("href", "https://www.google.com/search?q=");
-        if (hint_click) {
-            document.getElementById("hint_button").style.display = "block";
-            document.getElementById("hint_text").textContent = "";
-            hint_click = false;
-        }
         if (index < 5) {
             document.getElementById("question").textContent = data[index]["question"];
             document.getElementById("result").textContent = "";
@@ -168,6 +156,18 @@
             document.getElementById("answer").textContent = "";
             document.getElementById("actual_answer").textContent = "";
             document.getElementById("actual_commentary").textContent = "";
+            if (hint_click) {
+                document.getElementById("hint_button").style.display = "block";
+                document.getElementById("hint_text").textContent = "";
+                hint_click = false;
+            }
+            document.getElementById("question_number").textContent = index + 1;
+            document.getElementById("judge_button").style.display = "block";
+            document.getElementById("objection_action").style.display = "none";
+            document.getElementById("next_button").style.display = "none";
+            document
+                .getElementById("google_hints")
+                .setAttribute("href", "https://www.google.com/search?q=");
         } else {
             // 指摘成功判定を送る処理も書く
             window.location.href = `/result/?point=${points}&falsification=${falsification_result}`;

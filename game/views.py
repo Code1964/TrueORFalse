@@ -1,4 +1,9 @@
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from .models import Problem
+from django.http import JsonResponse
+import json
+
 
 # Create your views here.
 def result(request):
@@ -7,12 +12,17 @@ def result(request):
     # セッションからJSONデータを取得
     json_data = request.session.get('json_data', {})
     point = request.GET.get("point", "")
-    int_point = int(point)
     falsification = request.GET.get("falsification", "")
-    if falsification == "correct":
-        falsification_text = "間違いを指摘できましたね。"
+    if point and falsification:
+        int_point = int(point)
+        if falsification == "correct":
+            falsification_text = "間違いを指摘できましたね。"
+        else:
+            falsification_text = "間違いは指摘できませんでしたね。"
     else:
-        falsification_text = "間違いは指摘できませんでしたね。"
+        image_url = "img/stamp_english1.png"
+        result_text = f"嘘を見抜くことはコミュニケーションスキルの一環であり、相手の表情や言動、状況などから様々な情報を組み合わせて判断する能力が必要です。養っていけるよう頑張っていきましょう。"
+        return render(request, "result.html", context={"image_url": image_url, "result_text": result_text, "site_url": my_site_url})
     # int型に変更
     if int_point <= 0:
         image_url = "img/stamp_english5.png"
@@ -29,7 +39,7 @@ def result(request):
     elif int_point == 40:
         image_url = "img/stamp_english2.png"
         result_text = f"たった40点正解？まさか、そんなに知識が乏しいとは驚きだよ。ただ、{falsification_text}でも諦めるのは早いよ。次回に向けてしっかり勉強して、完全な正解を目指してみてはどうだ？頑張れ!"
-    elif int_point == 50 or 60:
+    elif int_point == 50 or int_point == 60:
         image_url = "img/stamp_english1.png"
         result_text = f"素晴らしい!あなたがChatGPTの嘘を見破る問題でしたことに驚かされます。{falsification_text}情報を正しく評価し、精査する能力は重要ですし、深い洞察力を示していることでしょう。これは情報を扱う上で非常に役立つスキルです。将来もさまざまな状況で活用できることでしょう。おめでとうございます!"
     elif int_point == 70:
@@ -40,3 +50,25 @@ def result(request):
         result_text = f"嘘を見抜くことはコミュニケーションスキルの一環であり、相手の表情や言動、状況などから様々な情報を組み合わせて判断する能力が必要です。養っていけるよう頑張っていきましょう。"
 
     return render(request, "result.html", context={"point": point, "image_url": image_url, "result_text": result_text, "json_data": json_data, "site_url": my_site_url})
+
+# CSRF検証を無効化
+@csrf_exempt
+def saveDB(request):
+    json_text = request.body
+    print(json_text)
+    if request.method == "POST":
+        try:
+            problem = json.loads(request.body)
+            Problem.objects.create(
+                question=problem.get('question'),
+                answer=problem.get('answer'),
+                hints=problem.get('hints'),
+                commentary=problem.get('commentary'),
+                falsification_answer=problem.get('falsification_answer'),
+                true_commentary=problem.get('true_commentary'),
+            )
+            return JsonResponse({"message": "データが保存されました"}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({"message": "データの保存に失敗しました"}, status=400)
+    else:
+        return JsonResponse({"message": "送信できませんでした"}, status=405)
