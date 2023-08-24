@@ -7,6 +7,10 @@
     <meta property="og:title" content="うそGPT" />
     <meta property="og:description" content="ChatGPTの嘘を見抜くためのサイトです" />
     <meta property="og:image" content="{% static image_url %}" />
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script>
+        let json = "{{ data|safe }}";
+    </script>
 {% endblock %}
 
 {% block title %}結果発表{% endblock %}
