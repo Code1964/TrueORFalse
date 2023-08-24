@@ -153,8 +153,24 @@ def difficulty(request):
                 falsification_commentary = falsification_response.choices[0]["message"]["content"]
                 # selected_dataの"commentary"を更新
                 selected_data["commentary"] = falsification_commentary
+                # データベースに登録(DBに移行予定)
+                # 作成したオブジェクトのIDを格納するリスト
+                created_objects_ids = []
+                for item in d:
+                    created_object = Data.objects.create(
+                        genre=genre_text,
+                        question=item["question"],
+                        answer=item["answer"],
+                        hints=item["hints"],
+                        commentary=item["commentary"],
+                        falsification_answer=item["falsification_answer"],
+                        true_commentary=item["true_commentary"],
+                        is_objection=False
+                    )
+                    created_objects_ids.append(created_object.id)
                 # d内の該当する部分をselected_dataで置き換える
-                for i, item in enumerate(d):
+                for i, (id, item) in enumerate(zip(created_objects_ids, d)):
+                    d[i]["id"] = id
                     if item["question"] == selected_data["question"]:
                         d[i]["commentary"] = selected_data["commentary"]
                 # ensure_ascii=Falseがないと日本語が文字化けする
@@ -162,8 +178,6 @@ def difficulty(request):
                 # セッションにJSONデータを保存
                 request.session['json_data'] = d
                 print(updated_text)
-                # データベースに登録
-                Data.objects.create(questions=updated_text)
                 return render(request, "questions.html", context={"data": updated_text})
 
     # 豆知識JSONファイル読み込み

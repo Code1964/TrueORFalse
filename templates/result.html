@@ -54,7 +54,7 @@
                             <form id="ajax-file-send" action="{% url 'game:saveDB' %}" method="post">
                                 {% csrf_token %}
                                 <!-- この書き方絶対に良くない(バグの温床) -->
-                                <input type="hidden" id="jsonData" value="{{ data|safe }}">
+                                <input type="hidden" id="IDData" value="{{ data.id }}">
                                 <button type="button" id="saveButton" class="btn btn-primary">データを保存</button>
                             </form>
                         </div>
@@ -71,18 +71,15 @@
     document.addEventListener("DOMContentLoaded", function() {
         const saveButton = document.getElementById("saveButton");
         saveButton.addEventListener("click", function() {
-            const jsonData = document.getElementById("jsonData").value;
-            saveDB(jsonData);
+            const IDData = document.getElementById("IDData").value;
+            saveDB(IDData);
         });
     });
     function saveDB(data) {
         const saveUrl = "{% url 'game:saveDB' %}";
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        // JSONデータ化
-        const jsonDataStr = JSON.stringify(data);
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/result/saveDB" , true);
-        // これしても文字化けする
         xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhr.setRequestHeader("X-CSRFToken", csrfToken);
         xhr.onreadystatechange = function() {
@@ -97,12 +94,7 @@
                 }
             }
         };
-        // これをしても文字化けする
-        // // JSON文字列をパースしてオブジェクトに変換
-        // const jsonDataObj = JSON.parse(jsonDataStr);
-        // // オブジェクトを文字列化して送信
-        // xhr.send(JSON.stringify(jsonDataObj));
-        xhr.send(jsonDataStr);
+        xhr.send(data);
     }
 </script>
 {% endblock %}

@@ -1,9 +1,7 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from .models import Problem
-from django.http import JsonResponse
-import json
-
+from .models import Data
+from django.http import HttpResponse
 
 # Create your views here.
 def result(request):
@@ -54,21 +52,17 @@ def result(request):
 # CSRF検証を無効化
 @csrf_exempt
 def saveDB(request):
-    json_text = request.body
-    print(json_text)
+    id_data = request.body
+    print(id_data)
     if request.method == "POST":
         try:
-            problem = json.loads(request.body)
-            Problem.objects.create(
-                question=problem.get('question'),
-                answer=problem.get('answer'),
-                hints=problem.get('hints'),
-                commentary=problem.get('commentary'),
-                falsification_answer=problem.get('falsification_answer'),
-                true_commentary=problem.get('true_commentary'),
-            )
-            return JsonResponse({"message": "データが保存されました"}, status=200)
-        except json.JSONDecodeError:
-            return JsonResponse({"message": "データの保存に失敗しました"}, status=400)
+            # DBの中のid_dataと同じIDのあるデータを見つけて置き換える
+            DB_data = Data.objects.get(id=int(id_data))
+            DB_data.is_objection = True
+            DB_data.save()
+        except:
+            return HttpResponse("データが保存されました", status=200)
+        else:
+            return HttpResponse("データの保存に失敗しました", status=400)
     else:
-        return JsonResponse({"message": "送信できませんでした"}, status=405)
+        return HttpResponse("データを送信できませんでした", status=405)
