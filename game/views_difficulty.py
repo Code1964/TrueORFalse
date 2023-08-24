@@ -8,6 +8,10 @@ load_dotenv()
 
 # Create your views here.
 def difficulty(request):
+    # 豆知識JSONファイル読み込み(バリデーションで弾かれたあとに読み込んだら表示されない)
+    with open('./trivia.json') as f:
+        trivia = json.load(f)
+        trivia_text = random.choice(trivia)
     error_text = "入力漏れがあります。2つとも選択してください。"
     if request.method == "POST":
         selected_difficulty = request.POST.get("selected_difficulty")
@@ -18,7 +22,7 @@ def difficulty(request):
         elif selected_difficulty == "society":
             difficulty_text = "社会人レベル"
         else:
-            return render(request, "difficulty.html", {'error_text': error_text})
+            return render(request, "difficulty.html", {"trivia_text": trivia_text ,'error_text': error_text})
 
         selected_genre = request.POST.get("selected_genre")
         if selected_genre == "miscellaneous":
@@ -28,7 +32,7 @@ def difficulty(request):
         elif selected_genre == "it":
             genre_text = "IT"
         else:
-            return render(request, "difficulty.html", {'error_text': error_text})
+            return render(request, "difficulty.html", {"trivia_text": trivia_text ,'error_text': error_text})
 
         # APIキー読み込み
         openai.api_key = os.getenv('ChatGPT_KEY')
@@ -93,17 +97,23 @@ def difficulty(request):
         ・出力を行う前に、jsonの内容を確認する。文章、本当か嘘かを表す英文字、3つのワード、解説のうち、いずれかが欠けていた場合はとても重い罰が下る。特にワードの数が3つぴったりであることは重大である
         上記の決まりに反すると、無差別に選ばれたなんの罪もない人が1000人死にます。
         """
-
         while True:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "user", "content": prompt.format(difficulty=difficulty_text, genre=genre_text, template=template)},
-                ],
-                temperature=0.1,
-            )
-            text = response.choices[0]["message"]["content"].strip()
-            text = text.replace("'", '"')
+            text = ""
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "user", "content": prompt.format(difficulty=difficulty_text, genre=genre_text, template=template)},
+                    ],
+                    temperature=0.1,
+                    request_timeout = 100,
+                )
+                text = response.choices[0]["message"]["content"].strip()
+                text = text.replace("'", '"')
+            # タイムアウトしたときの処理
+            except:
+                error_text = "どんな嘘をつくか考案中です。時間を空けてまた来てください。"
+                return render(request, "difficulty.html", {'error_text': error_text})
             print(text)
             # JSON形式で出力されない場合処理をやり直す
             try:
@@ -117,7 +127,7 @@ def difficulty(request):
                 for i, item in enumerate(d):
                     # 新しい項目"falsification_answer"を追加
                     d[i]["falsification_answer"] = "F"
-                    # "commentary"と"true_commentary"を同じ文章にする
+                    # "commentary"と"true_commentary"を同じ文章にする(。で改行して)
                     d[i]["true_commentary"] = item["commentary"]
                     # "answer"と"falsification_answer"をFをTに、TをFにする
                     if d[i]["question"] == selected_data["question"]:
@@ -136,29 +146,36 @@ def difficulty(request):
                 「{question_text}」という問題があります。
                 本来出力されるべき解説文は下記の文章ですが嘘をついたものを生成してください。
                 「{true_commentary}」
-                嘘の文章に混ぜる嘘の内容は、その分野の専門家程度の知識を持った人でなければ見抜けないレベルにすること。
+                ・嘘の文章に混ぜる嘘の内容は、その分野の専門家程度の知識を持った人でなければ見抜けないレベルにすること。
+                ・出力を途中で途切れさせてはならない。
                 ・解説文以外の出力は全て不要である。「了解しました」「分かりました」といったメッセージは不要である。もしも出力内容以外の不要なメッセージを出力した場合、重い罰が下る
                 上記の決まりに反すると、無差別に選ばれたなんの罪もない人が1000人死にます。
                 """
                 # "commentary"の文章を嘘の解説に変える処理を行う
-                falsification_response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "user", "content": falsification_prompt.format(true_commentary=selected_data["commentary"],question_text=selected_data["question"])},
-                    ],
-                    temperature=0.1,
-                    max_tokens=150,
-                )
-                # 適切な文章を取り出す
-                falsification_commentary = falsification_response.choices[0]["message"]["content"]
-                # selected_dataの"commentary"を更新
+                try:
+                    falsification_response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "user", "content": falsification_prompt.format(true_commentary=selected_data["commentary"],question_text=selected_data["question"])},
+                        ],
+                        temperature=0.1,
+                        max_tokens=150,
+                        request_timeout = 60,
+                    )
+                    # 適切な文章を取り出す
+                    falsification_commentary = falsification_response.choices[0]["message"]["content"]
+                except:
+                    error_text = "どんな嘘をつくか考案中です。時間を空けてまた来てください。"
+                    return render(request, "difficulty.html", {'error_text': error_text})
+                # selected_dataの"commentary"を更新(改行して)
                 selected_data["commentary"] = falsification_commentary
-                # データベースに登録(DBに移行予定)
+                # データベースに登録
                 # 作成したオブジェクトのIDを格納するリスト
                 created_objects_ids = []
                 for item in d:
                     created_object = Data.objects.create(
                         genre=genre_text,
+                        difficulty=difficulty_text,
                         question=item["question"],
                         answer=item["answer"],
                         hints=item["hints"],
@@ -179,9 +196,4 @@ def difficulty(request):
                 request.session['json_data'] = d
                 print(updated_text)
                 return render(request, "questions.html", context={"data": updated_text})
-
-    # 豆知識JSONファイル読み込み
-    with open('./trivia.json') as f:
-        trivia = json.load(f)
-        trivia_text = random.choice(trivia)
-        return render(request, "difficulty.html", context={"trivia_text": trivia_text})
+    return render(request, "difficulty.html", context={"trivia_text": trivia_text})

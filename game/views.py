@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from .models import Data
-from django.http import HttpResponse
+from django.http import JsonResponse
+import json
 
 # Create your views here.
 def result(request):
@@ -60,9 +61,8 @@ def saveDB(request):
             DB_data = Data.objects.get(id=int(id_data))
             DB_data.is_objection = True
             DB_data.save()
-        except:
-            return HttpResponse("データが保存されました", status=200)
-        else:
-            return HttpResponse("データの保存に失敗しました", status=400)
+            return JsonResponse({"message": "データが保存されました"}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({"message": "データの保存に失敗しました"}, status=400)
     else:
-        return HttpResponse("データを送信できませんでした", status=405)
+        return JsonResponse({"message": "送信できませんでした"}, status=405)
