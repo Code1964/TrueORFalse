@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .models import Data
 import json, random
+from random import sample
 import openai
 from dotenv import load_dotenv
 import os
@@ -197,3 +198,61 @@ def difficulty(request):
                 print(updated_text)
                 return render(request, "questions.html", context={"data": updated_text})
     return render(request, "difficulty.html", context={"trivia_text": trivia_text})
+
+def existing_difficulty(request):
+    # 豆知識JSONファイル読み込み(バリデーションで弾かれたあとに読み込んだら表示されない)
+    with open('./trivia.json') as f:
+        trivia = json.load(f)
+        trivia_text = random.choice(trivia)
+    error_text = "入力漏れがあります。2つとも選択してください。"
+    if request.method == "POST":
+        selected_difficulty = request.POST.get("selected_difficulty")
+        if selected_difficulty == "elementary_school":
+            difficulty_text = "小学校卒業"
+        elif selected_difficulty == "high_school":
+            difficulty_text = "・高校卒業"
+        elif selected_difficulty == "society":
+            difficulty_text = "社会人レベル"
+        else:
+            return render(request, "difficulty.html", {"trivia_text": trivia_text ,'error_text': error_text})
+
+        selected_genre = request.POST.get("selected_genre")
+        if selected_genre == "miscellaneous":
+            genre_text = "雑学"
+        elif selected_genre == "history":
+            genre_text = "歴史"
+        elif selected_genre == "it":
+            genre_text = "IT"
+        else:
+            return render(request, "difficulty.html", {"trivia_text": trivia_text ,'error_text': error_text})
+
+        # 既存の問題をDBから出題する("問題あり"問題は除外)
+        matching_t_questions = list(Data.objects.filter(difficulty=difficulty_text, genre=genre_text, is_objection=False, falsification_answer='T'))
+        matching_f_questions = list(Data.objects.filter(difficulty=difficulty_text, genre=genre_text, is_objection=False, falsification_answer='F'))
+        # Tが1問以上、Fが4問以上存在しない場合
+        if len(matching_t_questions) < 1 or len(matching_f_questions) < 4:
+            # 必要な問題数に達しない場合の処理
+            return render(request, "difficulty.html", {"trivia_text": trivia_text, 'error_text': "適切な問題がありません。"})
+        # Fの問題をランダムで抽出する
+        selected_questions = sample(matching_f_questions, 4)
+        # Tの問題をランダムで抽出し追加する
+        selected_questions.append(sample(matching_t_questions, 1)[0])
+        # selected_questionsをJSON形式にする
+        selected_questions_data = [
+            {
+                "question": question.question,
+                "answer": question.answer,
+                "hints": question.hints,
+                "commentary": question.commentary,
+                "falsification_answer": question.falsification_answer,
+                "true_commentary": question.true_commentary,
+                "id":question.id,
+            }
+            for question in selected_questions
+        ]
+        # セッションにJSONデータを保存
+        request.session['json_data'] = selected_questions_data
+        # ensure_ascii=Falseがないと日本語が文字化けする
+        question_text = json.dumps(selected_questions_data, ensure_ascii=False)
+        print(question_text)
+        return render(request, "questions.html", context={"data": question_text})

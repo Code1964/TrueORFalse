@@ -43,7 +43,8 @@
                         {{ error_text }}
                     </div>
                     {% endif %}
-                    <button type="submit" class="btn btn-primary">Start!</button>
+                    <button type="submit" class="btn btn-primary" data-action-url="{% url 'game:difficulty' %}">新しい問題に挑戦！(生成に時間がかかります)</button>
+                    <button type="submit" class="btn btn-primary"  data-action-url="{% url 'game:existing_difficulty' %}">既存の問題に挑戦！</button>
                 </form>
             </div>
             <!-- ローディングのアニメーション -->
@@ -64,4 +65,16 @@
             </div>
         </div>
         <script src="{% static 'js/loading.js' %}"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const form = document.getElementById("loading-form");
+                const buttons = form.querySelectorAll(".btn-primary");
+                buttons.forEach(button => {
+                    button.addEventListener("click", function(event) {
+                        const actionUrl = this.getAttribute("data-action-url");
+                        form.setAttribute("action", actionUrl);
+                    });
+                });
+            });
+        </script>
         {% endblock %}
