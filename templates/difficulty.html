@@ -46,6 +46,9 @@
                     <button type="submit" class="btn btn-primary" data-action-url="{% url 'game:difficulty' %}">新しい問題に挑戦！(生成に時間がかかります)</button>
                     <button type="submit" class="btn btn-primary"  data-action-url="{% url 'game:existing_difficulty' %}">既存の問題に挑戦！</button>
                 </form>
+                <a class="btn btn-primary" href="{% url 'game:problems' %}">
+                    "問題のある"問題ページ
+                </a>
             </div>
             <!-- ローディングのアニメーション -->
             <div class="wrapper" id="loading-container">

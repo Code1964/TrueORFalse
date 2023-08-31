@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}"問題"のある問題{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">{{ problem.question }}</h1>
+    <p><strong>正解:</strong> {{ problem.answer }}</p>
+    <p><strong>ヒント:</strong> {{ problem.hints }}</p>
+    <p><strong>解説:</strong> {{ problem.commentary }}</p>
+    {% if problem.falsification_answer == "T" %}
+        <p><strong>本当の正解:</strong> {{ problem.true_commentary }}</p>
+    {% endif %}
+</div>
+
+<div class="container">
+    <h2>みなさんの審議会場</h2>
+    <ul>
+        {% for comment in problem.comments.all %}
+            <li>{{ comment.comment }} - {{ comment.created_at }}</li>
+        {% endfor %}
+    </ul>
+    <form method="post" action="{% url 'game:add_comment' problem.id %}">
+        {% csrf_token %}
+        <label for="comment">意見する</label><br>
+        <textarea id="comment" name="comment" rows="4" cols="50"></textarea><br>
+        <button type="submit">コメント送信</button>
+    </form>
+</div>
+{% endblock %}
