@@ -4,8 +4,8 @@ services:
   web:
     build: .
     container_name: TrueORFalseGPT
-    # requirements.txtではopenaiが読み込めないため
-    command: bash -c "pip3 install openai && python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
+    # requirements.txtではopenaiとpsycopgが読み込めないため
+    command: bash -c "pip3 install openai && pip3 install psycopg && python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
     working_dir: /mysite
     ports:
       - 8000:8000
@@ -13,3 +13,10 @@ services:
       - .:/mysite
     # ポート待受とかしていないコンテナの場合、trueに設定しておくとコンテナが起動し続けます
     tty: true
+    depends_on:
+      - db
+  db:
+    image: postgres
+    environment:
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=postgres"
