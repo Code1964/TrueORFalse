@@ -19,7 +19,7 @@ def difficulty(request):
         if selected_difficulty == "elementary_school":
             difficulty_text = "小学校卒業"
         elif selected_difficulty == "high_school":
-            difficulty_text = "・高校卒業"
+            difficulty_text = "高校卒業"
         elif selected_difficulty == "society":
             difficulty_text = "社会人レベル"
         else:
@@ -145,11 +145,12 @@ def difficulty(request):
                 falsification_prompt = """
                 あなたは元々存在するものとは異なる解説文を生成するbotです。
                 「{question_text}」という問題があります。
-                本来出力されるべき解説文は下記の文章ですが嘘をついたものを生成してください。
+                本来出力されるべき解説文は下記の文章ですが、これとは異なった違和感がない嘘をついた文章を生成してください。
                 「{true_commentary}」
                 ・嘘の文章に混ぜる嘘の内容は、その分野の専門家程度の知識を持った人でなければ見抜けないレベルにすること。
+                ・存在しない単語を一つ以上含めること。
+                ・簡潔に収めてなければならない。長くても4行で終わらせること。
                 ・出力を途中で途切れさせてはならない。
-                ・文字数は60文字に収めなければならない。
                 ・解説文以外の出力は全て不要である。「了解しました」「分かりました」といったメッセージは不要である。
                 上記の決まりに反すると、無差別に選ばれたなんの罪もない人が1000人死にます。
                 """
@@ -161,7 +162,7 @@ def difficulty(request):
                             {"role": "user", "content": falsification_prompt.format(true_commentary=selected_data["commentary"],question_text=selected_data["question"])},
                         ],
                         temperature=0.1,
-                        max_tokens=150,
+                        max_tokens=250,
                         request_timeout = 60,
                     )
                     # 適切な文章を取り出す
