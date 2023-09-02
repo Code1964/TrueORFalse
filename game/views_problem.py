@@ -23,9 +23,13 @@ def add_comment(request, problem_id):
         if form.is_valid():
             # textareaのnameから取得
             comment_text = form.cleaned_data['comment']
+            print(problem)
+            print(comment_text)
             # Commentオブジェクトを作成して保存
             Comment.objects.create(problem=problem, comment=comment_text)
             return redirect('game:problem_thread', problem_id=problem_id)
     else:
+        print("バグ")
         form = CommentForm()
+    print("大バグ")
     return render(request, 'problem_thread.html', {'problem': problem})
