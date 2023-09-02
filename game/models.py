@@ -21,6 +21,7 @@ class Comment(models.Model):
     problem = models.ForeignKey('Data', on_delete=models.CASCADE, related_name='comments')
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    # is_question = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.comment

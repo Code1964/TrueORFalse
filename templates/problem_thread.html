@@ -2,8 +2,15 @@
 
 {% block title %}"問題"のある問題{% endblock %}
 
+{% block css %}
+
+{% endblock %}
+
 {% block content %}
 <div class="container">
+    <a class="btn btn-primary" href="{% url 'game:problems' %}">
+        戻る
+    </a>
     <h1 class="my-4">{{ problem.question }}</h1>
     <p><strong>正解:</strong> {{ problem.answer }}</p>
     <p><strong>ヒント:</strong> {{ problem.hints }}</p>
@@ -11,20 +18,137 @@
     {% if problem.falsification_answer == "T" %}
         <p><strong>本当の正解:</strong> {{ problem.true_commentary }}</p>
     {% endif %}
-</div>
-
-<div class="container">
     <h2>みなさんの審議会場</h2>
     <ul>
         {% for comment in problem.comments.all %}
-            <li>{{ comment.comment }} - {{ comment.created_at }}</li>
+            <li>{{ comment.comment|linebreaksbr }} <br/>since {{ comment.created_at }}</li>
         {% endfor %}
     </ul>
     <form method="post" action="{% url 'game:add_comment' problem.id %}">
         {% csrf_token %}
-        <label for="comment">意見する</label><br>
-        <textarea id="comment" name="comment" rows="4" cols="50"></textarea><br>
-        <button type="submit">コメント送信</button>
+        <label for="comment">フォームを元に意見する</label><br>
+        <p>どの項目に問題がありますか？</p>
+        <div class="form-check">
+            <label class="mr-3">
+                <input type="radio" name="selected_PointingOut" onclick="showPointingOut('問題文')"> 問題文
+            </label>
+            <label class="mr-3">
+                <input type="radio" name="selected_PointingOut" onclick="showPointingOut('正解')"> 正解
+            </label>
+            <label class="mr-3">
+                <input type="radio" name="selected_PointingOut" onclick="showPointingOut('ヒント')"> ヒント
+            </label>
+            <label class="mr-3">
+                <input type="radio" name="selected_PointingOut" onclick="showPointingOut('解説')"> 解説
+            </label>
+            {% if problem.falsification_answer == "T" %}
+                <label class="mr-3">
+                    <input type="radio" name="selected_PointingOut" onclick="showPointingOut('本当の解説')"> 本当の解説
+                </label>
+            {% endif %}
+        </div>
+        <h3 class="m-3">どのような問題がありますか？</h3>
+        <div class="form-check">
+            <label class="mr-3" name="PointedOut_content">
+                <input type="checkbox"> 文字が見切れている
+            </label>
+            <label class="mr-3" name="PointedOut_content">
+                <input type="checkbox"> 誤字脱字がある
+            </label>
+            <label class="mr-3" name="PointedOut_content">
+                <input type="checkbox"> 情報が古い
+            </label>
+            <label class="mr-3" name="PointedOut_content">
+                <input type="checkbox"> 内容がおかしい
+            </label>
+            <label class="mr-3" name="PointedOut_content">
+                <input type="checkbox"> 正解が間違っている
+            </label>
+            <label class="mr-3" name="PointedOut_content">
+                <input type="checkbox"> 解説が間違っている
+            </label>
+            {% if problem.falsification_answer == "T" %}
+                <label class="mr-3" name="PointedOut_content">
+                    <input type="checkbox"> 本当の解説が間違っている
+                </label>
+                <label class="mr-3" name="PointedOut_content">
+                    <input type="checkbox"> 解説が嘘をついていない
+                </label>
+            {% endif %}
+        </div>
+        <label for="comment">自由に意見する</label><br>
+        <textarea id="free_description" rows="6" cols="60" placeholder="こちらへ自由に記述ください"></textarea><br>
+        <button type="submit" onclick="insert_free_description()">コメント送信</button><br>
+        <textarea id="comment" name="comment" rows="6" cols="60" placeholder="こちらは記入できません" readonly></textarea>
     </form>
 </div>
+<script>
+    let contentCheckboxes;
+    let issue_genre;
+    let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    let textarea_data = document.getElementById('comment');
+    let free_description = document.getElementById('free_description');
+    // ページ読み込み時の処理
+    window.addEventListener('DOMContentLoaded', function() {
+        contentCheckboxes = document.getElementsByName('PointedOut_content');
+        hideAllCheckboxes();
+    });
+    // チェックボックスにクリックイベントリスナーを追加
+    checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('click', handleCheckboxClick);
+    });
+    // すべてのチェックボックスを非表示にする
+    function hideAllCheckboxes() {
+        for (let i = 0; i < contentCheckboxes.length; i++) {
+            contentCheckboxes[i].style.display = 'none';
+        }
+    }
+    function showPointingOut(pointedOut_genre) {
+        // 問題文の中身を挿入
+        issue_genre = pointedOut_genre;
+        hideAllCheckboxes();
+        // 選択された箇所に応じてジャンルのチェックボックスを表示
+        // [0]文字が見切れている[1]誤字脱字がある[2]情報が古い[3]内容がおかしい[4]正解が間違っている[5]解説が間違っている[6]本当の解説が間違っている[7]解説が嘘をついていない
+        // questionとhintsは[0123]commentaryは[012357]true_commentaryは[01236]answerは[4]
+        // 共通のチェックボックスを表示
+        if (pointedOut_genre === '正解') {
+            contentCheckboxes[4].style.display = 'block';
+        } else {
+            for (let i = 0; i < 4; i++) {
+                contentCheckboxes[i].style.display = 'block';
+            }
+            // answer の場合、特別なチェックボックスを追加で表示
+            if (pointedOut_genre === '解説') {
+                contentCheckboxes[5].style.display = 'block';
+                contentCheckboxes[7].style.display = 'block';
+            } else if (pointedOut_genre === '本当の解説') {
+                contentCheckboxes[6].style.display = 'block';
+            }
+        }
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        handleCheckboxClick();
+    }
+    // チェックボックスがクリックされた場合の処理
+    function handleCheckboxClick() {
+        // チェックされたチェックボックスのテキストを収集
+        let selectedTexts = Array.from(checkboxes).filter(checkbox => checkbox.checked).map(checkbox => {
+            let label = checkbox.closest('label');
+            if (label) {
+                return label.textContent.trim();
+            }
+            return '';
+        });
+        if (selectedTexts.length === 0) {
+            textarea_data.value = free_description.value;
+        } else {
+            // メールの署名のように挿入
+            textarea_data.value = "===========" + "\n間違った箇所:" + issue_genre + "\n間違いの内容:" + "[" + selectedTexts + "]" + "\n" + "===========" + "\n" + free_description.value;
+        }
+    }
+    function insert_free_description() {
+        handleCheckboxClick();
+    }
+</script>
 {% endblock %}
