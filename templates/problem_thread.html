@@ -19,13 +19,27 @@
         <p><strong>本当の正解:</strong> {{ problem.true_commentary }}</p>
     {% endif %}
     <h2>みなさんの審議会場</h2>
-    <ul>
-        {% for comment in problem.comments.all %}
-            <li>{{ comment.comment|linebreaksbr }} <br/>since {{ comment.created_at }}</li>
-        {% endfor %}
-    </ul>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">コメント</th>
+                <th scope="col">登録日時</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comment in problem.comments.all %}
+                <tr>
+                    <th scope="row">{{ comment.comment|linebreaksbr }}</th>
+                    <td>since {{ comment.created_at }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     <form method="post" action="{% url 'game:add_comment' problem.id %}">
         {% csrf_token %}
+        <label for="comment">自由に意見する</label><br>
+        <textarea id="free_description" rows="6" cols="60" placeholder="こちらへ自由に記述ください"></textarea><br>
+        <button type="submit" onclick="insert_free_description()">コメント送信</button><br>
         <label for="comment">フォームを元に意見する</label><br>
         <p>どの項目に問題がありますか？</p>
         <div class="form-check">
@@ -76,9 +90,6 @@
                 </label>
             {% endif %}
         </div>
-        <label for="comment">自由に意見する</label><br>
-        <textarea id="free_description" rows="6" cols="60" placeholder="こちらへ自由に記述ください"></textarea><br>
-        <button type="submit" onclick="insert_free_description()">コメント送信</button><br>
         <textarea id="comment" name="comment" rows="6" cols="60" placeholder="こちらは記入できません" readonly></textarea>
     </form>
 </div>

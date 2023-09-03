@@ -1,13 +1,25 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}ホーム{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="my-4">ようこそ</h1>
-    <p class="my-4">このChatGPTは嘘をつきます</p>
-    <a class="btn btn-primary" href="{% url 'game:difficulty' %}">
-        ゲームを始める
-    </a>
+<div class="d-flex justify-content-center align-items-center m-5">
+    <div class="text-center">
+        <p class="my-4 lead">ネットで生き抜く力を養うクイズアプリ</p>
+        <h1 class="my-4"><strong>ハルシネーションクイズジェネレーター</strong></h1>
+        <p class="my-4 lead">このChatGPT、嘘つきます</p>
+        <figure class="text-center">
+            <blockquote class="blockquote">
+                <p>うそはうそであると見抜ける人でないと<br class="d-inline d-lg-none" />(掲示板を使うのは)難しい</p>
+            </blockquote>
+            <figcaption class="blockquote-footer">
+                論破王</cite>
+            </figcaption>
+        </figure>
+        <a class="btn btn-primary rounded-pill px-3" href="{% url 'game:difficulty' %}">
+            ゲームを始める
+        </a>
+    </div>
 </div>
 {% endblock %}

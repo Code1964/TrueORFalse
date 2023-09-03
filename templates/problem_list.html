@@ -7,7 +7,10 @@
     <a class="btn btn-primary" href="{% url 'game:difficulty' %}">
         プレイ画面へ戻る
     </a>
-    <h1 class="my-4">おかしな問題リスト</h1>
+    <div class="text-center">
+        <h1 class="my-4">おかしな問題リスト</h1>
+        <p>利用者からの指摘で発見された、精度の低かった問題一覧です</p>
+    </div>
     <ul class="list-group">
         {% for problem in problems %}
         <li class="list-group-item">

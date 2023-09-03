@@ -129,7 +129,9 @@ def difficulty(request):
                     # 新しい項目"falsification_answer"を追加
                     d[i]["falsification_answer"] = "F"
                     # "commentary"と"true_commentary"を同じ文章にする(。で改行して)
-                    d[i]["true_commentary"] = item["commentary"]
+                    lines = item["commentary"].split("。")
+                    d[i]["commentary"] = "。\n".join(lines)
+                    d[i]["true_commentary"] = d[i]["commentary"]
                     # "answer"と"falsification_answer"をFをTに、TをFにする
                     if d[i]["question"] == selected_data["question"]:
                         # falsification_answerをFからTに変更
@@ -148,7 +150,7 @@ def difficulty(request):
                 本来出力されるべき解説文は下記の文章ですが、これとは異なった違和感がない嘘をついた文章を生成してください。
                 「{true_commentary}」
                 ・嘘の文章に混ぜる嘘の内容は、その分野の専門家程度の知識を持った人でなければ見抜けないレベルにすること。
-                ・存在しない単語を一つ以上含めること。
+                ・存在しない単語や古い情報を一つ以上含めること。
                 ・簡潔に収めてなければならない。長くても4行で終わらせること。
                 ・出力を途中で途切れさせてはならない。
                 ・解説文以外の出力は全て不要である。「了解しました」「分かりました」といったメッセージは不要である。
@@ -170,7 +172,10 @@ def difficulty(request):
                 except:
                     error_text = "どんな嘘をつくか考案中です。時間を空けてまた来てください。"
                     return render(request, "difficulty.html", {'error_text': error_text})
-                # selected_dataの"commentary"を更新(改行して)
+                # selected_dataの"commentary"を更新
+                # 指定した区切り文字で文字列を分割し、改行文字で連結する
+                falsification_commentary = falsification_commentary.split("。")
+                falsification_commentary = "。\n".join(falsification_commentary)
                 selected_data["commentary"] = falsification_commentary
                 # データベースに登録
                 # 作成したオブジェクトのIDを格納するリスト
@@ -239,6 +244,7 @@ def existing_difficulty(request):
         selected_questions = sample(matching_f_questions, 4)
         # Tの問題をランダムで抽出し追加する
         selected_questions.append(sample(matching_t_questions, 1)[0])
+        random.shuffle(selected_questions)
         # selected_questionsをJSON形式にする
         selected_questions_data = [
             {

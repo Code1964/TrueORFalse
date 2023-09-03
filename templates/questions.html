@@ -16,34 +16,36 @@
             第<span id="question_number">1</span>問
         </h1>
     </div>
-    <div class="card-body">
-        <p class="card-title" id="question"></p>
-        <div id="hint_button">
-            <button class="btn btn-primary" onclick="hint()">ヒント</button>
-        </div>
-        <p class="card-text" id="hint_text"></p>
-        <div id="judge_button">
-            <button class="btn btn-primary" onclick="judge('T')">True</button>
-            <button class="btn btn-primary" onclick="judge('F')">False</button>
-        </div>
-        <p id="answer"></p>
-        <h3 id="result"></h3>
-        <p id="commentary"></p>
-        <p id="points">現在のポイント: 0</p>
-        <div id="objection_button">
-            <div id="objection_action" style="display: none;">
-                <button class="btn btn-danger" onclick="objection()">異議あり！</button>
+    <div class="container">
+        <div class="card-body mx-5 text-wrap">
+            <h4 class="card-title border-bottom" id="question"></h4>
+            <div id="hint_button">
+                <button class="btn btn-primary" onclick="hint()">ヒント</button>
             </div>
-            <div class="text-center" id="objection_loading" style="display: none;">
-                <p>審議中です...</p>
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+            <p class="card-text" id="hint_text"></p>
+            <div id="judge_button">
+                <button class="btn btn-primary" onclick="judge('T')">True</button>
+                <button class="btn btn-primary" onclick="judge('F')">False</button>
+            </div>
+            <p id="answer"></p>
+            <h3 class="border" id="result"></h3>
+            <p id="commentary" style="white-space:pre-wrap; word-wrap:break-word;"></p>
+            <p id="points">現在のポイント: 0</p>
+            <div id="objection_button">
+                <div id="objection_action" style="display: none;">
+                    <button class="btn btn-danger" onclick="objection()">異議あり！</button>
+                </div>
+                <div class="text-center" id="objection_loading" style="display: none;">
+                    <p>審議中です...</p>
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
                 </div>
             </div>
+            <h5 id="judge"></h5>
+            <p id="actual_answer"></p>
+            <p id="actual_commentary"></p>
         </div>
-        <p id="judge"></p>
-        <p id="actual_answer"></p>
-        <p id="actual_commentary"></p>
     </div>
     <div class="card-footer text-body-secondary">
         <a id="google_hints" href="https://www.google.com/search?q=" class="btn btn-primary" target="_blank">ググる</a>
@@ -51,6 +53,27 @@
 </div>
 <div id="next_button" style="display: none;">
     <button class="btn btn-primary m-4" onclick="next()">次へ</button>
+</div>
+<!-- モーダル本体 -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">指摘失敗！</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                この問題は間違いでした！
+            </div>
+            <div class="modal-body">
+                本当の解説
+            </div>
+            <div class="modal-body" id="false_answer"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+            </div>
+        </div>
+    </div>
 </div>
 <script>
     let index = 0;
@@ -136,15 +159,20 @@
         }
     }
 
-    function next() {
+    async function next() {
         // falsificationだった問題を無視した場合に減点される
         if (falsification && falsification_result == "none") {
             // wrong_answerがtrue・falseの場合の処理
             points -= wrong_answer ? 30 : 20;
             document.getElementById("points").textContent = "現在のポイント: " + points;
             falsification_result = "incorrect";
-            // TODO この問題は間違いでしたとどこかに文章が出る(下から上に出てくるやつのほうが望ましい)
-            alert('この問題は間違いでした!')
+            document.getElementById("false_answer").textContent = data[index]["true_commentary"];
+            // 間違いだった旨をエラーとしてモーダルが起動する
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            await new Promise(resolve => {
+                errorModal.show();
+                errorModal._element.addEventListener('hidden.bs.modal', resolve);
+            });
         }
         falsification = false;
         index++;
