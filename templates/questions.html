@@ -143,7 +143,7 @@
             points -= wrong_answer ? 30 : 20;
             document.getElementById("points").textContent = "現在のポイント: " + points;
             falsification_result = "incorrect";
-            // この問題は間違いでしたとどこかに文章が出る
+            // TODO この問題は間違いでしたとどこかに文章が出る(下から上に出てくるやつのほうが望ましい)
             alert('この問題は間違いでした!')
         }
         falsification = false;
