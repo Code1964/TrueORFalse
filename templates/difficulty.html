@@ -5,12 +5,11 @@
 
 {% block css %}
     <link href="{% static 'css/loading.css' %}" rel="stylesheet">
-    <link href="{% static 'css/main.css' %}" rel="stylesheet">
 {% endblock %}
 
         {% block content %}
-        <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
-            <div id="difficulty-select">
+        <div class="d-flex justify-content-center align-items-center m-5">
+            <div class="text-center" id="difficulty-select">
                 <h1 class="m-3">難易度を選択してください</h1>
                 <form method="POST" id="loading-form">
                     {% csrf_token %}
@@ -43,15 +42,16 @@
                         {{ error_text }}
                     </div>
                     {% endif %}
-                    <button type="submit" class="btn btn-primary" data-action-url="{% url 'game:difficulty' %}">新しい問題に挑戦！(生成に時間がかかります)</button>
+                    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="生成に時間がかかります" data-action-url="{% url 'game:difficulty' %}">新しい問題に挑戦！</button>
                     <button type="submit" class="btn btn-primary"  data-action-url="{% url 'game:existing_difficulty' %}">既存の問題に挑戦！</button>
                 </form>
+                <h5 class="m-3">精度の悪い問題はこちらから</h5>
                 <a class="btn btn-primary" href="{% url 'game:problems' %}">
-                    "問題のある"問題ページ
+                    "問題のある"問題
                 </a>
             </div>
             <!-- ローディングのアニメーション -->
-            <div class="wrapper" id="loading-container">
+            <div class="text-center wrapper" id="loading-container">
                 <h1>Loading...</h1>
                 <div class="box-wrap">
                     <div class="box one"></div>

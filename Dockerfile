@@ -16,6 +16,9 @@ WORKDIR /mysite
 
 RUN pip3 install --upgrade pip
 
+# Langchanのインストールに必要
+RUN pip install --default-timeout=100 future
+
 ADD requirements.txt /mysite/
 
 RUN pip3 install --no-cache-dir -r requirements.txt

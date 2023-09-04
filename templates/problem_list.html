@@ -7,22 +7,27 @@
     <a class="btn btn-primary" href="{% url 'game:difficulty' %}">
         プレイ画面へ戻る
     </a>
-    <h1 class="my-4">おかしな問題リスト</h1>
-    <ul class="list-group">
-        {% for problem in problems %}
-        <li class="list-group-item">
-            <h4 class="mb-3">{{ problem.question }}</h4>
-            <p><strong>正解:</strong> {{ problem.answer }}</p>
-            <p><strong>ヒント:</strong> {{ problem.hints }}</p>
-            <p><strong>解説:</strong> {{ problem.commentary }}</p>
-            {% if problem.falsification_answer == "T" %}
-                <p><strong>本当の正解:</strong> {{ problem.true_commentary }}</p>
-            {% endif %}
-            <form action="{% url 'game:problem_thread' problem.id %}" method="get">
-                <button type="submit" class="btn btn-primary">スレッドを見る</button>
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
+    <div class="text-center mx-5">
+        <h1 class="my-4">おかしな問題リスト</h1>
+        <p>利用者からの指摘で発見された、精度の低かった問題一覧です</p>
+        <ul class="list-group">
+            {% for problem in problems %}
+            <li class="list-group-item pt-5">
+                <h4 class="mb-3">{{ problem.question }}</h4>
+                <div>
+                    <p><strong>正解:</strong> "{{ problem.answer }}"   <strong>ヒント:</strong> {{ problem.hints }}</p>
+                    <p></p>
+                </div>
+                <p style="white-space:pre-wrap; word-wrap:break-word;"><strong>解説</strong><br/>{{ problem.commentary }}</p>
+                {% if problem.falsification_answer == "T" %}
+                    <p style="white-space:pre-wrap; word-wrap:break-word;"><strong>本当の正解:</strong><br/>{{ problem.true_commentary }}</p>
+                {% endif %}
+                <form action="{% url 'game:problem_thread' problem.id %}" method="get">
+                    <button type="submit" class="btn btn-primary m-3">スレッドを見る</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 {% endblock %}

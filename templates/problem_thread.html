@@ -12,75 +12,103 @@
         戻る
     </a>
     <h1 class="my-4">{{ problem.question }}</h1>
-    <p><strong>正解:</strong> {{ problem.answer }}</p>
-    <p><strong>ヒント:</strong> {{ problem.hints }}</p>
+    <p><strong>正解:</strong> "{{ problem.answer }}",  <strong>ヒント:</strong> {{ problem.hints }}</p>
     <p><strong>解説:</strong> {{ problem.commentary }}</p>
     {% if problem.falsification_answer == "T" %}
         <p><strong>本当の正解:</strong> {{ problem.true_commentary }}</p>
     {% endif %}
-    <h2>みなさんの審議会場</h2>
-    <ul>
-        {% for comment in problem.comments.all %}
-            <li>{{ comment.comment|linebreaksbr }} <br/>since {{ comment.created_at }}</li>
-        {% endfor %}
-    </ul>
-    <form method="post" action="{% url 'game:add_comment' problem.id %}">
-        {% csrf_token %}
-        <label for="comment">フォームを元に意見する</label><br>
-        <p>どの項目に問題がありますか？</p>
-        <div class="form-check">
-            <label class="mr-3">
-                <input type="radio" name="selected_PointingOut" onclick="showPointingOut('問題文')"> 問題文
-            </label>
-            <label class="mr-3">
-                <input type="radio" name="selected_PointingOut" onclick="showPointingOut('正解')"> 正解
-            </label>
-            <label class="mr-3">
-                <input type="radio" name="selected_PointingOut" onclick="showPointingOut('ヒント')"> ヒント
-            </label>
-            <label class="mr-3">
-                <input type="radio" name="selected_PointingOut" onclick="showPointingOut('解説')"> 解説
-            </label>
-            {% if problem.falsification_answer == "T" %}
-                <label class="mr-3">
-                    <input type="radio" name="selected_PointingOut" onclick="showPointingOut('本当の解説')"> 本当の解説
-                </label>
-            {% endif %}
-        </div>
-        <h3 class="m-3">どのような問題がありますか？</h3>
-        <div class="form-check">
-            <label class="mr-3" name="PointedOut_content">
-                <input type="checkbox"> 文字が見切れている
-            </label>
-            <label class="mr-3" name="PointedOut_content">
-                <input type="checkbox"> 誤字脱字がある
-            </label>
-            <label class="mr-3" name="PointedOut_content">
-                <input type="checkbox"> 情報が古い
-            </label>
-            <label class="mr-3" name="PointedOut_content">
-                <input type="checkbox"> 内容がおかしい
-            </label>
-            <label class="mr-3" name="PointedOut_content">
-                <input type="checkbox"> 正解が間違っている
-            </label>
-            <label class="mr-3" name="PointedOut_content">
-                <input type="checkbox"> 解説が間違っている
-            </label>
-            {% if problem.falsification_answer == "T" %}
-                <label class="mr-3" name="PointedOut_content">
-                    <input type="checkbox"> 本当の解説が間違っている
-                </label>
-                <label class="mr-3" name="PointedOut_content">
-                    <input type="checkbox"> 解説が嘘をついていない
-                </label>
-            {% endif %}
-        </div>
-        <label for="comment">自由に意見する</label><br>
-        <textarea id="free_description" rows="6" cols="60" placeholder="こちらへ自由に記述ください"></textarea><br>
-        <button type="submit" onclick="insert_free_description()">コメント送信</button><br>
-        <textarea id="comment" name="comment" rows="6" cols="60" placeholder="こちらは記入できません" readonly></textarea>
-    </form>
+    <div class="text-center m-3">
+        <h3 class="m-3">コメントする</h3>
+        <div class="border-bottom"></div>
+        <form method="post" action="{% url 'game:add_comment' problem.id %}">
+            {% csrf_token %}
+            <h5 class="m-3">自由に意見する</h5>
+            <textarea id="free_description" rows="6" cols="60" placeholder="こちらへ自由に記述ください"></textarea><br>
+            <button type="submit" class="btn btn-primary m-3" onclick="insert_free_description()">コメント送信</button><br>
+            <h5 class="m-3">フォームを元に意見する</h5>
+            <div class="border">
+                <h6 class="m-3">どの項目に問題がありますか？</h6>
+                <div class="form-check">
+                    <label class="mr-3">
+                        <input type="radio" name="selected_PointingOut" onclick="showPointingOut('問題文')"> 問題文
+                    </label>
+                    <label class="mr-3">
+                        <input type="radio" name="selected_PointingOut" onclick="showPointingOut('正解')"> 正解
+                    </label>
+                    <label class="mr-3">
+                        <input type="radio" name="selected_PointingOut" onclick="showPointingOut('ヒント')"> ヒント
+                    </label>
+                    <label class="mr-3">
+                        <input type="radio" name="selected_PointingOut" onclick="showPointingOut('解説')"> 解説
+                    </label>
+                    {% if problem.falsification_answer == "T" %}
+                        <label class="mr-3">
+                            <input type="radio" name="selected_PointingOut" onclick="showPointingOut('本当の解説')"> 本当の解説
+                        </label>
+                    {% endif %}
+                </div>
+                <h6 class="m-3">どのような問題がありますか？</h6>
+                <div class="form-check form-check-inline">
+                    <label class="mr-3" name="PointedOut_content">
+                        <input type="checkbox"> 文字が見切れている
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <label class="mr-3" name="PointedOut_content">
+                        <input type="checkbox"> 誤字脱字がある
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <label class="mr-3" name="PointedOut_content">
+                        <input type="checkbox"> 情報が古い
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <label class="mr-3" name="PointedOut_content">
+                        <input type="checkbox"> 内容がおかしい
+                    </label>
+                </div>
+                <div class="form-check">
+                    <label class="mr-3" name="PointedOut_content">
+                        <input type="checkbox"> 正解が間違っている
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <label class="mr-3" name="PointedOut_content">
+                        <input type="checkbox"> 解説が間違っている
+                    </label>
+                </div>
+                {% if problem.falsification_answer == "T" %}
+                <div class="form-check form-check-inline mb-3">
+                    <label class="mr-3" name="PointedOut_content">
+                        <input type="checkbox"> 本当の解説が間違っている
+                    </label>
+                    <label class="mr-3" name="PointedOut_content">
+                        <input type="checkbox"> 解説が嘘をついていない
+                    </label>
+                </div>
+                {% endif %}
+                </div>
+            <textarea class="m-3" id="comment" name="comment" rows="6" cols="60" placeholder="こちらは記入できません" readonly style="display: none;"></textarea>
+        </form>
+    </div>
+    <h2 class="text-center m-3">みなさんの審議会場</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">コメント</th>
+                <th scope="col">登録日時</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comment in problem.comments.all %}
+                <tr>
+                    <th scope="row">{{ comment.comment|linebreaksbr }}</th>
+                    <td>since {{ comment.created_at }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 <script>
     let contentCheckboxes;
@@ -149,6 +177,11 @@
     }
     function insert_free_description() {
         handleCheckboxClick();
+    }
+    // すべてのチェックボックスを非表示にする
+    function openPreview() {
+        textarea_data.style.display = "block";
+        document.getElementById('hideButton').style.display = "none";
     }
 </script>
 {% endblock %}

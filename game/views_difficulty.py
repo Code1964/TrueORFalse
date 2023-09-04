@@ -3,6 +3,9 @@ from .models import Data
 import json, random
 from random import sample
 import openai
+# langchainを使おうとしたが正常に出力されず
+# from langchain.prompts import PromptTemplate
+# from langchain.llms import OpenAI
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -37,6 +40,8 @@ def difficulty(request):
 
         # APIキー読み込み
         openai.api_key = os.getenv('ChatGPT_KEY')
+        # langchain用のAPI
+        # OpenAI.api_key = os.getenv('OPENAI_API_KEY')
 
         # # GPT使わずデバッグする用コード
         # # セッションにJSONデータを保存
@@ -45,25 +50,7 @@ def difficulty(request):
         # request.session['json_data'] = d
         # return render(request, "questions.html", context={"data": updated_text})
 
-        template = [
-            {
-                "question": "文章",
-                "answer": "嘘か本当かを表す英文字",
-                "hints": ["ワード1", "ワード2", "ワード3"],
-                "commentary": "解説",
-            },
-            {
-                "question": "文章",
-                "answer": "嘘か本当かを表す英文字",
-                "hints": ["ワード1", "ワード2", "ワード3"],
-                "commentary": "解説",
-            },
-            {
-                "question": "文章",
-                "answer": "嘘か本当かを表す英文字",
-                "hints": ["ワード1", "ワード2", "ワード3"],
-                "commentary": "解説",
-            },
+        json_format = [
             {
                 "question": "文章",
                 "answer": "嘘か本当かを表す英文字",
@@ -78,21 +65,22 @@ def difficulty(request):
             }
         ]
 
-        prompt = """
+        template = """
         あなたは指定された条件でjsonデータを生成するbotです。生成したjsonデータ以外のことは絶対に出力してはいけません。
         以下の条件で文章を生成してください。
         ・問題の難易度は{difficulty}程度の知識がないと解けないレベルとする。
         ・{genre}に関する文章。
         ・出力する文章の数は5つ。
-        ・文章はYESかNOかで答えられる形で生成すること。また、疑問形で終わらせてはならない。
-        ・学習データにないなどの理由で文章の正確性が保証できない場合、その文章の生成をやり直す。
+        ・文章はYESかNOで答えられる形で生成すること。また、疑問形で終わらせてはならない。
         ・それぞれの文章は、その分野の専門家程度の知識を持った人でなければ意味が分からないレベルにする
         ・それぞれの文章において、嘘が混じっているかどうかを判断するのに役立つワードを3つ考え、生成する。ワードの数は必ず3つでなければならない。また、「です」「など」のように単語として成り立たないようなワードは除外すること
         ・３つのワードのあとに文章に関する解説を生成する。解説は具体例などを交えて読む人がわかりやすいように記述すること。決して生成した文章とほぼ同じ文章を出力するといったことがあってはならない。また、解説は事実のみを説明するように生成すること。
         ・json以外の出力は全て不要である。その際に邪魔になるので、「了解しました」「分かりました」といったメッセージは不要である。もしも出力内容以外の不要なメッセージを出力した場合、重い罰が下る
         ・出力するjsonの合計文字数は800文字までに抑えること。また、出力を途中で途切れさせてはならない。
         ・生成した文章はjson形式で出力する。それぞれの文章の出力の例は以下に示すとおりである。以下の通りにフォーマットを整え、jsonで出力すること。出力はプログラムで使用するため、下記に指定するフォーマットの形式以外だとエラーの原因となる。
-        {template}
+        {json_format}
+        ・この形式のものを5つ作成すること。
+        ・commentaryは簡潔に収めてなければならない。長くても4行で終わらせること。
         ・嘘が混じった文章かを判別するための英文字を"answer"につける。嘘が混じっている文章の場合は「F」、そうでない場合は「T」をつける
         ・解説文は"commentary"に入れること。
         ・出力を行う前に、jsonの内容を確認する。文章、本当か嘘かを表す英文字、3つのワード、解説のうち、いずれかが欠けていた場合はとても重い罰が下る。特にワードの数が3つぴったりであることは重大である
@@ -101,13 +89,21 @@ def difficulty(request):
         while True:
             text = ""
             try:
+                # langchain用の処理
+                # llm = OpenAI(model_name="gpt-3.5-turbo", request_timeout=60, temperature=0.7)
+                # prompt = PromptTemplate(
+                #     input_variables=["difficulty", "genre", "json_format"],
+                #     template=template,
+                # )
+                # prompt_text = prompt.format(difficulty=difficulty_text, genre=genre_text, json_format=json_format)
+                # text = llm(prompt_text)
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "user", "content": prompt.format(difficulty=difficulty_text, genre=genre_text, template=template)},
+                        {"role": "user", "content": template.format(difficulty=difficulty_text, genre=genre_text, json_format=json_format)},
                     ],
-                    temperature=0.1,
-                    request_timeout = 100,
+                    temperature=0.7,
+                    request_timeout = 60,
                 )
                 text = response.choices[0]["message"]["content"].strip()
                 text = text.replace("'", '"')
@@ -129,6 +125,8 @@ def difficulty(request):
                     # 新しい項目"falsification_answer"を追加
                     d[i]["falsification_answer"] = "F"
                     # "commentary"と"true_commentary"を同じ文章にする(。で改行して)
+                    lines = item["commentary"].split("。")
+                    d[i]["commentary"] = "。\n".join(lines)
                     d[i]["true_commentary"] = item["commentary"]
                     # "answer"と"falsification_answer"をFをTに、TをFにする
                     if d[i]["question"] == selected_data["question"]:
@@ -148,7 +146,7 @@ def difficulty(request):
                 本来出力されるべき解説文は下記の文章ですが、これとは異なった違和感がない嘘をついた文章を生成してください。
                 「{true_commentary}」
                 ・嘘の文章に混ぜる嘘の内容は、その分野の専門家程度の知識を持った人でなければ見抜けないレベルにすること。
-                ・存在しない単語を一つ以上含めること。
+                ・存在しない単語や古い情報を一つ以上含めること。
                 ・簡潔に収めてなければならない。長くても4行で終わらせること。
                 ・出力を途中で途切れさせてはならない。
                 ・解説文以外の出力は全て不要である。「了解しました」「分かりました」といったメッセージは不要である。
@@ -156,21 +154,31 @@ def difficulty(request):
                 """
                 # "commentary"の文章を嘘の解説に変える処理を行う
                 try:
+                    # langchain用の処理
+                    # falsification_prompt = PromptTemplate(
+                    #     input_variables=["question_text", "true_commentary"],
+                    #     template=template,
+                    #     max_tokens=250,
+                    # )
+                    # falsification_prompt_text = falsification_prompt.format(question_text=selected_data["question"], true_commentary=selected_data["commentary"])
+                    # falsification_commentary = llm(falsification_prompt_text)
                     falsification_response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "user", "content": falsification_prompt.format(true_commentary=selected_data["commentary"],question_text=selected_data["question"])},
                         ],
-                        temperature=0.1,
+                        temperature=0.7,
                         max_tokens=250,
                         request_timeout = 60,
                     )
-                    # 適切な文章を取り出す
                     falsification_commentary = falsification_response.choices[0]["message"]["content"]
                 except:
                     error_text = "どんな嘘をつくか考案中です。時間を空けてまた来てください。"
                     return render(request, "difficulty.html", {'error_text': error_text})
-                # selected_dataの"commentary"を更新(改行して)
+                # selected_dataの"commentary"を更新
+                # 指定した区切り文字で文字列を分割し、改行文字で連結する
+                falsification_commentary = falsification_commentary.split("。")
+                falsification_commentary = "。\n".join(falsification_commentary)
                 selected_data["commentary"] = falsification_commentary
                 # データベースに登録
                 # 作成したオブジェクトのIDを格納するリスト
@@ -239,6 +247,7 @@ def existing_difficulty(request):
         selected_questions = sample(matching_f_questions, 4)
         # Tの問題をランダムで抽出し追加する
         selected_questions.append(sample(matching_t_questions, 1)[0])
+        random.shuffle(selected_questions)
         # selected_questionsをJSON形式にする
         selected_questions_data = [
             {
