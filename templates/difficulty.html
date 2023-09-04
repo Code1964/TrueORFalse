@@ -45,13 +45,13 @@
                     <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="生成に時間がかかります" data-action-url="{% url 'game:difficulty' %}">新しい問題に挑戦！</button>
                     <button type="submit" class="btn btn-primary"  data-action-url="{% url 'game:existing_difficulty' %}">既存の問題に挑戦！</button>
                 </form>
-                <p>精度の悪い問題はこちらから</p>
+                <h5 class="m-3">精度の悪い問題はこちらから</h5>
                 <a class="btn btn-primary" href="{% url 'game:problems' %}">
                     "問題のある"問題
                 </a>
             </div>
             <!-- ローディングのアニメーション -->
-            <div class="wrapper" id="loading-container">
+            <div class="text-center wrapper" id="loading-container">
                 <h1>Loading...</h1>
                 <div class="box-wrap">
                     <div class="box one"></div>

@@ -46,8 +46,7 @@
                     <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}">
                         <div class="accordion-body">
                             <p>{{ data.question }}</p>
-                            <p>回答: {{ data.answer }}</p>
-                            <p>ヒント: {{ data.hints|join:", " }}</p>
+                            <p><strong>正解:</strong>"{{ data.answer }}"  <strong>ヒント:</strong> {{ data.hints|join:", " }}</p>
                             <p style="white-space:pre-wrap; word-wrap:break-word;">解説: {{ data.commentary }}</p>
                             {% if data.falsification_answer == "T" %}
                                 <p>嘘か本当かを表す英文字: {{ data.falsification_answer }}</p>
