@@ -39,7 +39,7 @@ def difficulty(request):
             return render(request, "difficulty.html", {"trivia_text": trivia_text ,'error_text': error_text})
 
         # APIキー読み込み
-        openai.api_key = os.getenv('CHATGPT_API')
+        openai.api_key = os.getenv('ChatGPT_KEY')
         # langchain用のAPI
         # OpenAI.api_key = os.getenv('OPENAI_API_KEY')
 
