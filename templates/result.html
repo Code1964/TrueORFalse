@@ -38,7 +38,7 @@
         </a>
         <a href="/difficulty" class="btn btn-primary">もう一度プレイする</a>
         {% if json_data %}
-        <h1>問題一覧</h1>
+        <h1 class="m-3">問題一覧</h1>
             {% for data in json_data %}
             <div class="row">
                 <div class="col-md-6 mx-auto accordion" id="accordion{{ forloop.counter }}">
@@ -52,10 +52,10 @@
                             <div class="accordion-body">
                                 <p>{{ data.question }}</p>
                                 <p><strong>正解:</strong>"{{ data.answer }}"  <strong>ヒント:</strong> {{ data.hints|join:", " }}</p>
-                                <p style="white-space:pre-wrap; word-wrap:break-word;">解説: {{ data.commentary }}</p>
+                                <p style="white-space:pre-wrap; word-wrap:break-word;"><strong>解説: </strong>{{ data.commentary }}</p>
                                 {% if data.falsification_answer == "T" %}
-                                    <p>嘘か本当かを表す英文字: {{ data.falsification_answer }}</p>
-                                    <p style="white-space:pre-wrap; word-wrap:break-word;">真実の解説: {{ data.true_commentary }}</p>
+                                    <p><strong>↑これは嘘の解説です↑</strong></p>
+                                    <p style="white-space:pre-wrap; word-wrap:break-word;"><strong>真実の解説:</strong> {{ data.true_commentary }}</p>
                                 {% endif %}
                                 <form id="ajax-{{ data.id }}" action="{% url 'game:saveDB' %}" method="post">
                                     {% csrf_token %}
