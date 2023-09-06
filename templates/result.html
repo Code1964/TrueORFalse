@@ -25,9 +25,15 @@
         {% if point %}
             <h1 class="card-title">{{ point }}点！</h1>
         {% endif %}
-        <p class="border border-5 border-danger card-text" style="white-space:pre-wrap; word-wrap:break-word;">{{ result_text }}</p>
+        <div class="m-3">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-10 col-lg-8">
+                    <p class="border border-5 card-text p-3" style="white-space:pre-wrap; word-wrap:break-word;">{{ result_text }}</p>
+                </div>
+            </div>
+        </div>
         {% if point %}
-            <a class="btn btn-primary" href="https://twitter.com/intent/tweet?text=あなたの点数は{{ point }}点です！&url={{ site_url }}" target="_blank">
+            <a class="btn btn-primary" href="https://twitter.com/intent/tweet?text=あなたの点数は{{ point }}点です！\n&url={{ site_url }}" target="_blank">
         {% else %}
             <a class="btn btn-primary" href="https://twitter.com/intent/tweet?text=&url={{ site_url }}" target="_blank">
         {% endif %}
@@ -41,7 +47,7 @@
         <h1 class="m-3">問題一覧</h1>
             {% for data in json_data %}
             <div class="row">
-                <div class="col-md-6 mx-auto accordion" id="accordion{{ forloop.counter }}">
+                <div class="col-lg-6 mx-auto accordion" id="accordion{{ forloop.counter }}">
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading{{ forloop.counter }}">
                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}">

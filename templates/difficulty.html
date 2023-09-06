@@ -5,11 +5,20 @@
 
 {% block css %}
     <link href="{% static 'css/loading.css' %}" rel="stylesheet">
+    <link href="{% static 'css/inputButton.css' %}" rel="stylesheet">
 {% endblock %}
 
         {% block content %}
         <div class="d-flex justify-content-center align-items-center m-5">
             <div class="text-center" id="difficulty-select">
+                <div class="simpleButton">
+                    <a href="{% url 'game:home' %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                        </svg>
+                        タイトル画面に戻る
+                    </a>
+                </div>
                 <h1 class="m-3">難易度を選択してください</h1>
                 <form method="POST" id="loading-form">
                     {% csrf_token %}
@@ -42,12 +51,12 @@
                         {{ error_text }}
                     </div>
                     {% endif %}
-                    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="生成に時間がかかります" data-action-url="{% url 'game:difficulty' %}">新しい問題に挑戦！</button>
+                    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="※生成に時間がかかります" data-action-url="{% url 'game:difficulty' %}">新しい問題に挑戦！</button>
                     <button type="submit" class="btn btn-primary"  data-action-url="{% url 'game:existing_difficulty' %}">既存の問題に挑戦！</button>
                 </form>
-                <h5 class="m-3">精度の悪い問題はこちらから</h5>
-                <a class="btn btn-primary" href="{% url 'game:problems' %}">
-                    "問題のある"問題
+                <h5 class="m-3">↓精度の悪い問題はこちらから↓</h5>
+                <a class="btn btn-danger px-5" href="{% url 'game:problems' %}">
+                    "問題アリ"問題一覧
                 </a>
             </div>
             <!-- ローディングのアニメーション -->
@@ -69,6 +78,8 @@
         </div>
         <script src="{% static 'js/loading.js' %}"></script>
         <script>
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
             document.addEventListener("DOMContentLoaded", function() {
                 const form = document.getElementById("loading-form");
                 const buttons = form.querySelectorAll(".btn-primary");

@@ -26,6 +26,8 @@ def add_comment(request, problem_id):
             # Commentオブジェクトを作成して保存
             Comment.objects.create(problem=problem, comment=comment_text)
             return redirect('game:problem_thread', problem_id=problem_id)
+        else:
+            return render(request, 'problem_thread.html', {'problem': problem, 'error_text': "入力が確認できませんでした"})
     else:
         form = CommentForm()
     return render(request, 'problem_thread.html', {'problem': problem})

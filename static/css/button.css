@@ -1,0 +1,50 @@
+
+
+.simpleButton a {
+    background: #eee;
+    border-radius: 50px;
+    position: relative;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin: 0 auto;
+    max-width: 260px;
+    padding: 10px 25px;
+    color: #313131;
+    transition: 0.3s ease-in-out;
+    font-weight: 500;
+    text-decoration: none;
+}
+.simpleButton a:after {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    border-radius: 1px;
+    transition: 0.2s ease-in-out;
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    transform: translateY(-50%);
+}
+.simpleButton a:hover {
+    background: #313131;
+    color: #FFF;
+}
+
+.btn-minecraft {
+    display: inline-block;
+    padding: 0.5em 5em;
+    text-decoration: none;
+    background-color: #6f6f6f;
+    border: solid 2px #a7a7a7;
+    border-right: solid 2px #5a5b5b;
+    border-bottom: solid 2px #5a5b5b;
+    box-shadow: 0px 0px 0px 2px #0a0a0a;
+    color: #fff;
+}
+
+.btn-minecraft:hover {
+    background-color: #7e88bf;
+    border: solid 2px #c1cbff;
+    border-right: solid 2px #5c659d;
+    border-bottom: solid 2px #5c659d;
+}

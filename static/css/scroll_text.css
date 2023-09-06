@@ -1,0 +1,19 @@
+.text-marquee_container {
+    overflow: hidden;
+}
+.text-marquee_text {
+    transform: translateX(100%);
+    animation: marquee 5s linear infinite;
+}
+@keyframes marquee {
+    0% {
+        -moz-transform: translateX(100%);
+        -webkit-transform: translateX(100%);
+        transform: translateX(100%);
+    }
+    100% {
+        -moz-transform: translateX(-100%);
+        -webkit-transform: translateX(-100%);
+        transform: translateX(-100%);
+    }
+}
